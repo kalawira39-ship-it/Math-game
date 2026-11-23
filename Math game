@@ -1,0 +1,418 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Game of Learn of Mathematics</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#eef4ff;
+  color:#183153;
+}
+header{
+  background:linear-gradient(135deg,#12316a,#1682e8);
+  color:white;
+  text-align:center;
+  padding:25px 12px;
+}
+h1{font-size:25px}
+main{max-width:650px;margin:auto;padding:15px}
+.card{
+  background:white;
+  border-radius:15px;
+  padding:20px;
+  margin-bottom:15px;
+  box-shadow:0 3px 12px #0001;
+}
+button,select{font-size:16px}
+button{
+  border:0;
+  border-radius:10px;
+  padding:13px;
+  cursor:pointer;
+}
+.primary{
+  width:100%;
+  background:#1269d3;
+  color:white;
+  font-weight:bold;
+}
+.back{background:#e2ebf7;margin-bottom:12px}
+.topic,.option{
+  display:block;
+  width:100%;
+  text-align:left;
+  background:#eaf2ff;
+  margin:9px 0;
+}
+.levels{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+}
+.levels button{background:#dcecff}
+.levels button:disabled{
+  background:#eee;
+  color:#888;
+}
+.correct{background:#b9efc9!important}
+.wrong{background:#ffd0d0!important}
+.progress{
+  height:10px;
+  background:#dce7f5;
+  border-radius:20px;
+  overflow:hidden;
+}
+#bar{height:100%;background:#ffbf00;width:0}
+#feedback{line-height:1.6}
+.small{font-size:13px;color:#64748b}
+footer{text-align:center;padding:20px;color:#64748b}
+[hidden]{display:none!important}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>🎮 Game of Learn of Mathematics</h1>
+<p>Learn Mathematics, Play and Win! 🏆</p>
+<p id="points">⭐ Total Points: 0</p>
+</header>
+
+<main>
+
+<section class="card" id="home">
+<h2>📚 Choose Your Form</h2>
+
+<select id="form" style="width:100%;padding:13px">
+<option>Form One</option>
+<option>Form Two</option>
+<option selected>Form Three</option>
+<option>Form Four</option>
+</select>
+
+<h3>Choose Mathematics Topic</h3>
+<div id="topics"></div>
+</section>
+
+<section class="card" id="levels" hidden>
+<button class="back" onclick="showHome()">
+← Topics
+</button>
+<h2 id="topicTitle"></h2>
+<p>Score at least 70% to unlock the next level.</p>
+<div class="levels" id="levelButtons"></div>
+</section>
+
+<section class="card" id="game" hidden>
+<button class="back" onclick="showLevels()">
+← Levels
+</button>
+<p id="gameInfo"></p>
+<div class="progress"><div id="bar"></div></div>
+<h2 id="question"></h2>
+<div id="answers"></div>
+<p id="feedback"></p>
+<button class="primary" id="next" hidden
+onclick="nextQuestion()">
+Next Question →
+</button>
+</section>
+
+<section class="card" id="result" hidden>
+<h2 id="resultTitle"></h2>
+<h1 id="resultScore"></h1>
+<p id="resultMessage"></p>
+<button class="primary" onclick="showLevels()">
+Back to Levels
+</button>
+</section>
+
+<section class="card">
+<h3>📢 Advertisement</h3>
+<p class="small">
+Advertisement space. Real advertisements
+will be added after approval.
+</p>
+</section>
+
+</main>
+
+<footer>© Game of Learn of Mathematics</footer>
+
+<script>
+const topics = {
+"Form One":[
+"Numbers","Fractions","Decimals",
+"Integers","Basic Algebra","Geometry"
+],
+"Form Two":[
+"Algebra","Ratio and Proportion",
+"Percentages","Equations",
+"Pythagoras' Theorem"
+],
+"Form Three":[
+"Functions","Relations","Linear Programming",
+"Sequences and Series","Circles"
+],
+"Form Four":[
+"Probability","Matrices","Vectors",
+"Trigonometry","Revision"
+]
+};
+
+const circles = [
+{
+q:"What is the distance from the centre to the circumference called?",
+o:["Diameter","Radius","Chord","Arc"],
+a:1,
+e:"The radius is the distance from the centre to the circumference."
+},
+{
+q:"A circle has radius 7 cm. Find its diameter.",
+o:["7 cm","14 cm","21 cm","49 cm"],
+a:1,
+e:"Diameter = 2 × radius = 14 cm."
+},
+{
+q:"What is the angle around the centre of a circle?",
+o:["90°","180°","270°","360°"],
+a:3,
+e:"A complete revolution is 360°."
+},
+{
+q:"The angle in a semicircle is:",
+o:["45°","60°","90°","180°"],
+a:2,
+e:"An angle in a semicircle is 90°."
+},
+{
+q:"A central angle is 100°. Find the circumference angle on the same arc.",
+o:["25°","50°","100°","200°"],
+a:1,
+e:"The circumference angle is half the central angle: 100° ÷ 2 = 50°."
+},
+{
+q:"A line segment joining two points on a circle is called:",
+o:["Radius","Tangent","Chord","Sector"],
+a:2,
+e:"A chord joins two points on the circumference."
+},
+{
+q:"A tangent touches a circle at how many points?",
+o:["One","Two","Three","Four"],
+a:0,
+e:"A tangent touches a circle at one point."
+},
+{
+q:"The radius at the point of tangency makes which angle with the tangent?",
+o:["30°","45°","90°","180°"],
+a:2,
+e:"The radius and tangent are perpendicular: 90°."
+},
+{
+q:"Opposite angles of a cyclic quadrilateral add up to:",
+o:["90°","120°","180°","360°"],
+a:2,
+e:"Opposite angles in a cyclic quadrilateral add up to 180°."
+},
+{
+q:"A central angle is 140°. Find the circumference angle on the same arc.",
+o:["40°","70°","140°","280°"],
+a:1,
+e:"140° ÷ 2 = 70°."
+}
+];
+
+const bank = {
+"Form Three|Circles|1":circles
+};
+
+const $ = id => document.getElementById(id);
+
+let form="Form Three";
+let topic="Circles";
+let level=1;
+let index=0;
+let score=0;
+let answered=false;
+let progress={};
+
+try{
+progress=JSON.parse(
+localStorage.getItem("math-game-progress")||"{}"
+);
+}catch(e){
+progress={};
+}
+
+function key(l){
+return form+"|"+topic+"|"+l;
+}
+
+function save(){
+try{
+localStorage.setItem(
+"math-game-progress",
+JSON.stringify(progress)
+);
+}catch(e){}
+}
+
+function show(id){
+["home","levels","game","result"].forEach(x=>{
+$(x).hidden=x!==id;
+});
+window.scrollTo(0,0);
+}
+
+function updatePoints(){
+let total=Object.values(progress).reduce(
+(s,p)=>s+(p.best||0),0
+);
+$("points").textContent="⭐ Total Points: "+total;
+}
+
+function renderTopics(){
+form=$("form").value;
+$("topics").innerHTML="";
+
+topics[form].forEach(t=>{
+let b=document.createElement("button");
+b.className="topic";
+b.textContent="📘 "+t+" →";
+b.onclick=()=>{
+topic=t;
+showLevels();
+};
+$("topics").appendChild(b);
+});
+}
+
+function showHome(){
+renderTopics();
+show("home");
+}
+
+function showLevels(){
+$("topicTitle").textContent=form+" — "+topic;
+$("levelButtons").innerHTML="";
+
+for(let l=1;l<=3;l++){
+let unlocked=l===1||
+(progress[key(l-1)]?.best||0)>=70;
+
+let b=document.createElement("button");
+b.textContent=(unlocked?"⭐ ":"🔒 ")+"Level "+l;
+b.disabled=!unlocked;
+b.onclick=()=>start(l);
+
+$("levelButtons").appendChild(b);
+}
+
+show("levels");
+}
+
+function start(l){
+level=l;
+
+if(!bank[key(level)]){
+alert("Questions for this topic and level are coming soon!");
+return;
+}
+
+index=0;
+score=0;
+answered=false;
+show("game");
+renderQuestion();
+}
+
+function renderQuestion(){
+let q=bank[key(level)][index];
+answered=false;
+
+$("gameInfo").textContent=
+form+" / "+topic+" / Level "+level+
+" — Question "+(index+1)+"/10";
+
+$("bar").style.width=(index/10*100)+"%";
+$("question").textContent=q.q;
+$("answers").innerHTML="";
+$("feedback").textContent="";
+$("next").hidden=true;
+
+q.o.forEach((a,i)=>{
+let b=document.createElement("button");
+b.className="option";
+b.textContent="ABCD"[i]+". "+a;
+b.onclick=()=>choose(i);
+$("answers").appendChild(b);
+});
+}
+
+function choose(i){
+if(answered)return;
+answered=true;
+
+let q=bank[key(level)][index];
+
+$("answers").querySelectorAll("button")
+.forEach((b,j)=>{
+b.disabled=true;
+if(j===q.a)b.classList.add("correct");
+if(j===i&&i!==q.a)b.classList.add("wrong");
+});
+
+if(i===q.a)score+=10;
+
+$("feedback").textContent=
+(i===q.a?"✅ Correct! +10 points. ":"❌ Incorrect. ")+q.e;
+
+$("next").hidden=false;
+$("next").textContent=
+index===9?"See Results 🏆":"Next Question →";
+}
+
+function nextQuestion(){
+index++;
+
+if(index<10){
+renderQuestion();
+return;
+}
+
+let old=progress[key(level)]?.best||0;
+
+progress[key(level)]={
+best:Math.max(old,score)
+};
+
+save();
+updatePoints();
+
+$("resultTitle").textContent=
+score>=70?"🏆 Level Passed!":"📚 Keep Practising!";
+
+$("resultScore").textContent=score+"/100";
+
+$("resultMessage").textContent=
+score>=70
+?"Congratulations! You passed. The next level is unlocked."
+:"You need at least 70 points to pass. Try again!";
+
+show("result");
+}
+
+$("form").addEventListener("change",renderTopics);
+
+updatePoints();
+showHome();
+</script>
+
+</body>
+</html>
